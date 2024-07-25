@@ -1,31 +1,44 @@
 //todo: we're not gonna hardcode the server .. it's supposed to be able
 //to fetch data from anywhere
 export function fetchAllProducts() {
-    return new Promise(async (resolve) =>{
-      try{const response = await fetch('http://localhost:8080/products') 
-      if(!response )console.log('network response not ok');
-      const data = await response.json()
-      resolve({data})}
-      catch(error){
-           console.log(error);
-      }
+  return new Promise(async (resolve) => {
+    try {
+      const response = await fetch("http://localhost:8080/products");
+      if (!response) console.log("network response not ok");
+      const data = await response.json();
+      resolve({ data });
+    } catch (error) {
+      console.log(error);
     }
-    );
-  }
-  export function fetchProductsByFilter(filter) {
-    let querystring='';
-    for(let key in filter){
-     querystring+= `${key}=${filter[key]}&`
-    }
-    querystring=querystring.slice(0,-1);
-    console.log(querystring);
-    
-    return new Promise(async (resolve) =>{
-      console.log(querystring);
-      const response = await fetch('http://localhost:8080/products?&'+querystring) 
-      if(!response )console.log('network response not ok');
-      const data = await response.json()
-      resolve({data})}
-    );
-  }
+  });
+}
 
+export function fetchProductsByFilter({filter,sort}) {
+  //TODO:
+  //filter= {"category":"smartphone","laptops"}..something like that
+  //sort= {_sort:"price",_order="asc"}
+  //on server we'll support multi values
+  let querystring = '';
+  for (let key in filter) {
+    const categoryValues = filter[key];
+    if (categoryValues.length) {
+      const lastCategoryValue = categoryValues[categoryValues.length - 1];
+      querystring += `${key}=${lastCategoryValue}&`;
+    }
+  }
+  for(let key in sort){
+    querystring += `${key}=${sort[key]}&`
+  }
+  querystring= querystring.slice(0,-1);
+  console.log(querystring);
+
+  return new Promise(async (resolve) => {
+    console.log(querystring);
+    const response = await fetch(
+      "http://localhost:8080/products?&" + querystring
+    );
+    if (!response) console.log("network response not ok");
+    const data = await response.json();
+    resolve({ data });
+  });
+}
